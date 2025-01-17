@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.Blinker;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.CRServo; 
@@ -17,8 +18,7 @@ public class MeetOne2025 extends LinearOpMode {
     private DcMotor wormDriveLeft = null;
     private CRServo wristLeft = null;
     private CRServo wristRight = null; 
-    private CRServo intakeLeft = null;
-    private CRServo intakeRight = null; 
+    private CRServo intake = null;
 
     @Override
     public void runOpMode() {
@@ -34,6 +34,11 @@ public class MeetOne2025 extends LinearOpMode {
         wristLeft = hardwareMap.get(CRServo.class, "wristLeft");
         wristRight = hardwareMap.get(CRServo.class, "wristRight");
         intake = hardwareMap.get(CRServo.class, "intake"); // Single intake servo
+        wristLeft.setPower(0.0);
+        wristRight.setPower(0.0);
+        wristLeft.resetDeviceConfigurationForOpMode();
+        wristRight.resetDeviceConfigurationForOpMode();
+
  
 
         // Reverse motor direction(!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!MAY HAVE AN ISSUE!!! CHECK THEM!!!!
@@ -41,6 +46,7 @@ public class MeetOne2025 extends LinearOpMode {
         topL.setDirection(DcMotor.Direction.REVERSE);
         topR.setDirection(DcMotor.Direction.REVERSE); 
         linearSlideRight.setDirection(DcMotor.Direction.REVERSE);
+        wristRight.setDirection(DcMotor.Direction.REVERSE);
 
         telemetry.addData("Status", "Initialized");
         telemetry.addData(">", "ROBOT IS READY. HURRY AND START.");
@@ -95,34 +101,36 @@ public class MeetOne2025 extends LinearOpMode {
 // ---------- Linear SHOOT
 
             if (gamepad2.y) {
-                linearSlideLeft.setPower(0.5);
-                linearSlideRight.setPower(0.5);
-                sleep(800);
-                linearSlideLeft.setPower(0);
-                linearSlideRight.setPower(0);
-                sleep(800);
-            } else if (gamepad2.a) {
                 linearSlideLeft.setPower(-0.5);
                 linearSlideRight.setPower(-0.5);
                 sleep(800);
                 linearSlideLeft.setPower(0);
                 linearSlideRight.setPower(0);
                 sleep(800);
+            } else if (gamepad2.a) {
+                linearSlideLeft.setPower(0.5);
+                linearSlideRight.setPower(0.5);
+                sleep(800);
+                linearSlideLeft.setPower(0);
+                linearSlideRight.setPower(0);
+                sleep(800);
             } 
             // ----- Wrist Control (Left Side) -----
-            double wristLeftPosition = 0; // Default midpoint position
-            double wristRightPosition = 0;
 
             if (gamepad2.left_trigger > 0.1) {
-                wristLeftPosition = Math.min(1.0, wristLeftPosition + 0.01); // Increase position
-                wristRightPosition = Math.min(1.0, wristRightPosition + 0.01); // Increase position
+                wristLeft.setPower(0.5); // Rotate wrist left forward
+                wristRight.setPower(0.5); // Rotate wrist right forward
             } else if (gamepad2.left_bumper) {
-                wristLeftPosition = Math.max(0.0, wristLeftPosition - 0.01); // Decrease position
-                wristRightPosition = Math.max(0.0, wristRightPosition - 0.01); // Decrease position
+                wristLeft.setPower(-0.5); // Rotate wrist left backward
+                wristRight.setPower(-0.5); // Rotate wrist right backward
+            } else {
+                wristLeft.setPower(0.0); // Stop wrist left
+                wristRight.setPower(0.0); // Stop wrist right
             }
 
-            wristLeft.setPosition(wristLeftPosition);
-            wristRight.setPosition(wristRightPosition); 
+            wristLeft.setPower(wristPower);
+            wristRight.setPower(wristPower);
+
 
             // ----- Intake Control (Right Side Controls) -----
             if (gamepad2.right_trigger > 0.1) {
