@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode;
-
-
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.CRServo; 
@@ -8,12 +7,18 @@ import com.qualcomm.robotcore.hardware.CRServo;
 @TeleOp(name = "MeetOne2025")
 public class MeetOne2025 extends LinearOpMode { 
     private Blinker control_Hub;
-
-    private DcMotor topL, topR, bottomL, bottomR;
-    private DcMotor linearSlideRight, wormDriveRight, linearSlideLeft, wormDriveLeft;
-    private CRServo wristLeft, wristRight, intake;
-
-
+    private DcMotor bottomL = null;
+    private DcMotor bottomR = null;
+    private DcMotor topL = null;
+    private DcMotor topR = null;
+    private DcMotor linearSlideRight = null; 
+    private DcMotor wormDriveRight = null;
+    private DcMotor linearSlideLeft = null; 
+    private DcMotor wormDriveLeft = null;
+    private CRServo wristLeft = null;
+    private CRServo wristRight = null; 
+    private CRServo intakeLeft = null;
+    private CRServo intakeRight = null; 
 
     @Override
     public void runOpMode() {
@@ -31,7 +36,7 @@ public class MeetOne2025 extends LinearOpMode {
         intake = hardwareMap.get(CRServo.class, "intake"); // Single intake servo
  
 
-        // Reverse motor direction
+        // Reverse motor direction(!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!MAY HAVE AN ISSUE!!! CHECK THEM!!!!
         bottomL.setDirection(DcMotor.Direction.REVERSE);
         topL.setDirection(DcMotor.Direction.REVERSE);
         topR.setDirection(DcMotor.Direction.REVERSE); 
@@ -42,8 +47,7 @@ public class MeetOne2025 extends LinearOpMode {
         telemetry.update(); 
 
         waitForStart();
- 
-
+        
         double wristPower = 0.0; // Initialize wrist power
         double intakePower = 0.0; // Initialize intake power
  
@@ -76,7 +80,7 @@ public class MeetOne2025 extends LinearOpMode {
                 wormDriveLeft.setPower(0);
             }
 
-/ ---------- Linear small 
+// ---------- Linear SMALL 
             if (gamepad2.dpad_left) {
                 linearSlideRight.setPower(-0.5);
                 linearSlideLeft.setPower(-0.5);
@@ -106,6 +110,9 @@ public class MeetOne2025 extends LinearOpMode {
                 sleep(800);
             } 
             // ----- Wrist Control (Left Side) -----
+            double wristLeftPosition = 0; // Default midpoint position
+            double wristRightPosition = 0;
+
             if (gamepad2.left_trigger > 0.1) {
                 wristLeftPosition = Math.min(1.0, wristLeftPosition + 0.01); // Increase position
                 wristRightPosition = Math.min(1.0, wristRightPosition + 0.01); // Increase position
