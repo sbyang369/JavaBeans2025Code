@@ -69,7 +69,7 @@ public class AUTO_BlueRight extends LinearOpMode {
 
         if (opModeIsActive()) {
             //make sure it works - can it reach high basket??
-            sleep(15000); // Waits for 10,000 milliseconds (10 seconds)
+            sleep(15000); // Waits for 15,000 milliseconds (15 seconds)
           
             // Drive to high basket 
             driveForward(3,0.5);
@@ -79,33 +79,31 @@ public class AUTO_BlueRight extends LinearOpMode {
             driveForward(10,0.5);
             
             //Arm controls
-            linearSlideRight.setPower(0.5); //extend arm
-            linearSlideLeft.setPower(0.5);
-            sleep(1200);
-            linearSlideRight.setPower(0);
-            linearSlideLeft.setPower(0);
-            //----intake scoring stuff (wrist down, spin intake, wrist up)
-            wrist.setPower(0.5);
-            sleep(500);
-            wrist.setPower(0);
-          
-            wrist.setPower(-0.5);
-            sleep(500);
-            wrist.setPower(0);
-          
-            intake.setPower(-0.5);
-            sleep(500);
-            intake.setPower(0);
-
-            wrist.setPower(0.5);
-            sleep(500);
-            wrist.setPower(0);
-            
-            linearSlideRight.setPower(-0.5); //deextend arm
+            linearSlideRight.setPower(-0.5); //extend arm
             linearSlideLeft.setPower(-0.5);
+            sleep(1200);
+            sleep(1000);
+            
+            //---- Scoring
+
+            wristLeft.setPower(-0.5);
+            wristRight.setPower(-0.5);
+            sleep(500);
+            sleep(1000);
+            
+            intake.setPower(-0.5);
+            sleep(2000);
+            intake.setPower(0);
+            sleep(500);
+
+            wristLeft.setPower(0.5);
+            wristRight.setPower(0.5);
             sleep(800);
-            linearSlideRight.setPower(0);
-            linearSlideLeft.setPower(0);
+            sleep(1000);
+            
+            linearSlideRight.setPower(0.5); //deextend arm
+            linearSlideLeft.setPower(0.5);
+            sleep(1600);
             
             //--------Park in ascent
             driveForward(-10,0.5);
