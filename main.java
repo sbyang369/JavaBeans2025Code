@@ -47,7 +47,6 @@ public class MeetOne2025 extends LinearOpMode {
 
         double linearSlideStartTime = 0;
         boolean isLinearSlideMoving = false;
-        double HOLD_POWER = 0.1;  // Adjust if needed
         linearSlideRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         while (opModeIsActive()) {
@@ -55,7 +54,7 @@ public class MeetOne2025 extends LinearOpMode {
             double y = -gamepad1.left_stick_y;
             double x = gamepad1.left_stick_x * 1.1; // Adjust for strafing
             double rx = gamepad1.right_stick_x;
-            double maxPower = 0.6;
+            double maxPower = 0.5;
             double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
             double frontLeftPower = (y + x + rx) / denominator * maxPower;
             double backLeftPower = (y - x + rx) / denominator * maxPower;
@@ -66,6 +65,7 @@ public class MeetOne2025 extends LinearOpMode {
             bottomL.setPower(backLeftPower);
             topR.setPower(frontRightPower);
             bottomR.setPower(backRightPower); 
+            
 // ---------- Wormdrive
             if (gamepad2.dpad_up) {
                 wormDriveRight.setPower(0.8); // Move up
@@ -83,27 +83,12 @@ public class MeetOne2025 extends LinearOpMode {
                 linearSlideRight.setPower(-0.5);
             } else if (gamepad2.dpad_right) {
                 linearSlideRight.setPower(0.5);
-            } else if (!isLinearSlideMoving) {  // Don't override auto movement
-                linearSlideRight.setPower(HOLD_POWER);
+            } else {  
+                linearSlideRight.setPower(0);
             }
 
-            // ------ AUTO Linear Extension with A/Y ------
-            if (gamepad2.a && !isLinearSlideMoving) {
-                isLinearSlideMoving = true;
-                linearSlideStartTime = getRuntime();
-                linearSlideRight.setPower(-0.5);
-            } else if (gamepad2.y && !isLinearSlideMoving) {
-                isLinearSlideMoving = true;
-                linearSlideStartTime = getRuntime();
-                linearSlideRight.setPower(0.5);
-            }
-
-            if (isLinearSlideMoving && (getRuntime() - linearSlideStartTime > (linearSlideRight.getPower() < 0 ? 1.8 : 2.2))) {
-                linearSlideRight.setPower(HOLD_POWER);  // Apply hold power after stopping
-                isLinearSlideMoving = false;
-            }
             // Wrist and Intake Control (unchanged)
-            wrist.setPower(gamepad2.left_trigger > 0.1 ? -0.9 : gamepad2.left_bumper ? 0.9 : 0.0);
+            wrist.setPower(gamepad2.left_trigger > 0.1 ? -0.2 : gamepad2.left_bumper ? 0.2 : 0.0);
             intake.setPower(gamepad2.right_trigger > 0.1 ? 0.5 : gamepad2.right_bumper ? -0.2 : 0.0);
 
 
