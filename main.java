@@ -1,23 +1,22 @@
 package org.firstinspires.ftc.teamcode;
+
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Blinker;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.CRServo; 
+import com.qualcomm.robotcore.hardware.CRServo;
 
 @TeleOp(name = "MeetOne2025")
-public class MeetOne2025 extends LinearOpMode { 
+public class MeetOne2025 extends LinearOpMode {
     private Blinker control_Hub;
     private DcMotor bottomL = null;
     private DcMotor bottomR = null;
     private DcMotor topL = null;
     private DcMotor topR = null;
-    private DcMotor linearSlideRight = null; 
+    private DcMotor linearSlideRight = null;
     private DcMotor wormDriveRight = null;
-    private DcMotor linearSlideLeft = null; 
     private DcMotor wormDriveLeft = null;
-    private CRServo wristLeft = null;
-    private CRServo wristRight = null; 
+    private CRServo wrist = null;
     private CRServo intake = null;
 
     @Override
@@ -29,37 +28,30 @@ public class MeetOne2025 extends LinearOpMode {
         bottomR = hardwareMap.get(DcMotor.class, "bottomR");
         linearSlideRight = hardwareMap.get(DcMotor.class, "linearSlideRight");
         wormDriveRight = hardwareMap.get(DcMotor.class, "wormDriveRight");
-        linearSlideLeft = hardwareMap.get(DcMotor.class, "linearSlideLeft");
         wormDriveLeft = hardwareMap.get(DcMotor.class, "wormDriveLeft");
-        wristLeft = hardwareMap.get(CRServo.class, "wristLeft");
-        wristRight = hardwareMap.get(CRServo.class, "wristRight");
-        intake = hardwareMap.get(CRServo.class, "intake"); // Single intake servo
-        wristLeft.setPower(0.0);
-        wristRight.setPower(0.0);
-        wristLeft.resetDeviceConfigurationForOpMode();
-        wristRight.resetDeviceConfigurationForOpMode();
+        wrist = hardwareMap.get(CRServo.class, "wrist");
+        intake = hardwareMap.get(CRServo.class, "intake");
 
- 
-
-        // Reverse motor direction(!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!MAY HAVE AN ISSUE!!! CHECK THEM!!!!
+        wrist.setPower(0.0);
+        
+        // Reverse motor direction
         bottomL.setDirection(DcMotor.Direction.REVERSE);
         topL.setDirection(DcMotor.Direction.REVERSE);
-        topR.setDirection(DcMotor.Direction.REVERSE); 
-        linearSlideRight.setDirection(DcMotor.Direction.REVERSE);
-        wristRight.setDirection(DcMotor.Direction.REVERSE);
-
         telemetry.addData("Status", "Initialized");
-        telemetry.addData(">", "ROBOT IS READY. HURRY AND START.");
-        telemetry.update(); 
+        telemetry.update();
 
         waitForStart();
-        
-        double wristPower = 0.0; // Initialize wrist power
-        double intakePower = 0.0; // Initialize intake power
- 
 
-        while (opModeIsActive()) { 
-            // ----- Movement Control ----- 
+        double wristPower = 0.0;
+        double intakePower = 0.0;
+
+        double linearSlideStartTime = 0;
+        boolean isLinearSlideMoving = false;
+        double HOLD_POWER = 0.1;  // Adjust if needed
+        linearSlideRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        while (opModeIsActive()) {
+            // Normal movement and other functions
             double y = -gamepad1.left_stick_y;
             double x = gamepad1.left_stick_x * 1.1; // Adjust for strafing
             double rx = gamepad1.right_stick_x;
@@ -86,70 +78,38 @@ public class MeetOne2025 extends LinearOpMode {
                 wormDriveLeft.setPower(0);
             }
 
-// ---------- Linear SMALL 
+            // ------ Manual Linear Control (Dpad) Works Fine ------
             if (gamepad2.dpad_left) {
                 linearSlideRight.setPower(-0.5);
-                linearSlideLeft.setPower(-0.5);
             } else if (gamepad2.dpad_right) {
                 linearSlideRight.setPower(0.5);
-                linearSlideLeft.setPower(0.5);
-            } else {
-                linearSlideRight.setPower(0);
-                linearSlideLeft.setPower(0);
+            } else if (!isLinearSlideMoving) {  // Don't override auto movement
+                linearSlideRight.setPower(HOLD_POWER);
             }
-            
-// ---------- Linear SHOOT
 
-            if (gamepad2.y) {
-                linearSlideLeft.setPower(-0.5);
+            // ------ AUTO Linear Extension with A/Y ------
+            if (gamepad2.a && !isLinearSlideMoving) {
+                isLinearSlideMoving = true;
+                linearSlideStartTime = getRuntime();
                 linearSlideRight.setPower(-0.5);
-                sleep(800);
-                linearSlideLeft.setPower(0);
-                linearSlideRight.setPower(0);
-                sleep(800);
-            } else if (gamepad2.a) {
-                linearSlideLeft.setPower(0.5);
+            } else if (gamepad2.y && !isLinearSlideMoving) {
+                isLinearSlideMoving = true;
+                linearSlideStartTime = getRuntime();
                 linearSlideRight.setPower(0.5);
-                sleep(800);
-                linearSlideLeft.setPower(0);
-                linearSlideRight.setPower(0);
-                sleep(800);
-            } 
-            // ----- Wrist Control (Left Side) -----
-
-            if (gamepad2.left_trigger > 0.1) {
-                wristLeft.setPower(0.5); // Rotate wrist left forward
-                wristRight.setPower(0.5); // Rotate wrist right forward
-            } else if (gamepad2.left_bumper) {
-                wristLeft.setPower(-0.5); // Rotate wrist left backward
-                wristRight.setPower(-0.5); // Rotate wrist right backward
-            } else {
-                wristLeft.setPower(0.0); // Stop wrist left
-                wristRight.setPower(0.0); // Stop wrist right
             }
 
-            wristLeft.setPower(wristPower);
-            wristRight.setPower(wristPower);
-
-
-            // ----- Intake Control (Right Side Controls) -----
-            if (gamepad2.right_trigger > 0.1) {
-                intakePower = 0.5; // Spin intake forward
-            } else if (gamepad2.right_bumper) {
-                intakePower = -0.5; // Spin intake backward
-            } else {
-                intakePower = 0.0; // Stop intake
+            if (isLinearSlideMoving && (getRuntime() - linearSlideStartTime > (linearSlideRight.getPower() < 0 ? 1.8 : 2.2))) {
+                linearSlideRight.setPower(HOLD_POWER);  // Apply hold power after stopping
+                isLinearSlideMoving = false;
             }
+            // Wrist and Intake Control (unchanged)
+            wrist.setPower(gamepad2.left_trigger > 0.1 ? -0.9 : gamepad2.left_bumper ? 0.9 : 0.0);
+            intake.setPower(gamepad2.right_trigger > 0.1 ? 0.5 : gamepad2.right_bumper ? -0.2 : 0.0);
 
-            intake.setPower(intakePower);
 
-            // Telemetry for debugging
+            // Telemetry
             telemetry.addData("Wrist Power", wristPower);
             telemetry.addData("Intake Power", intakePower);
-            telemetry.addData("Front Left Power", frontLeftPower);
-            telemetry.addData("Front Right Power", frontRightPower);
-            telemetry.addData("Back Left Power", backLeftPower);
-            telemetry.addData("Back Right Power", backRightPower);
             telemetry.update();
         }
     }
